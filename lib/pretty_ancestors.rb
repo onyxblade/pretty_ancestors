@@ -1,46 +1,64 @@
 class Module
-  def prepended_modules
+  def modules_prepended
     ancestors.take_while{|x| x != self}
   end
 
-  def included_modules
-    ancestors.drop_while{|x| x != self}.drop(1).take_while{|x| x.instance_of? Module}
+  def modules_included
+    ancestors.drop_while{|x| x != self}.drop(1).select{|x| x.instance_of? Module}
   end
 
-  def pretty_ancestors
-    map = {}
+  def shift_recur mods, map, level
+    return [[], map] if mods.empty?
+    origin_map = map
+    init, *tail = mods
 
-    analyze = lambda do |mod|
-      #p mod
-      case
-      when map[mod]
-        false
-      when mod.prepended_modules.empty? && mod.included_modules.empty?
-        map[mod] = true
-        mod
+    if map[init]
+      if map[init] < level
+        return false, map
       else
-        a = mod.prepended_modules.reverse.map do |x|
-          analyze.call x
-        end.select(&:itself).reverse
-
-        b = mod.included_modules.reverse.map do |x|
-          analyze.call x
-        end.select(&:itself).reverse
-
-        map[mod] = true
-
-        if a.empty? && b.empty?
-          mod
+        result, map = shift_recur(tail, map, level + 1)
+        if result
+          return result, map
         else
-          [a, mod, b]
+          return false, map
         end
       end
     end
 
-    if self.instance_of? Class
-      ancestors.select{|x| x.instance_of? Class}.reverse.map{|x| analyze.call x}.reverse
+    prepended = init.modules_prepended
+    included = init.modules_included
+
+    in_front, map = shift_recur(prepended, map.merge(init => level), level + 1)
+    behind, map = shift_recur(included, map.merge(init => level), level + 1)
+    #p [in_front, behind]
+    if in_front && behind
+      result, map = shift_recur(tail, map.merge(init => level), level + 1)
+      if result
+        if in_front.empty? && behind.empty?
+          [[init].concat(result), map]
+        else
+          [[[in_front, init, behind]].concat(result), map]
+        end
+      else
+        map = origin_map
+        shift_recur(tail, map, level)
+      end
     else
-      analyze.call self
+      [false, map]
+    end
+
+  end
+
+  def pretty_ancestors
+    if self.instance_of? Module
+      shift_recur([self], {}, 0)[0][0]
+    elsif self.instance_of? Class
+      ancestors.select{|x| x.instance_of? Class}.reverse.reduce([[], {}]) do |(arr, map), x|
+        result = shift_recur([x], map, 0)
+        #p result
+        arr << result[0][0]
+        [arr, map.merge(x.ancestors.map{|x| [x, 99]}.to_h)]
+      end[0].reverse
     end
   end
 end

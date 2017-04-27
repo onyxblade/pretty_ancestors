@@ -1,5 +1,6 @@
 require './lib/pretty_ancestors'
 
+
 module M1
 end
 
@@ -8,12 +9,25 @@ module M2
 end
 
 module M3
-  prepend M2
 end
 
-p M3.ancestors
-p M3.ancestors.map{|x| [x.prepended_modules, x, x.included_modules]}
-p M3.pretty_ancestors
+module M4
+end
+
+module M5
+end
+
+class C
+  include M4
+  include M2
+  prepend M5
+end
+
+class Object
+  prepend M3
+end
+
+p C.pretty_ancestors
 
 #prepend prepend
 [M1, M2, M3]

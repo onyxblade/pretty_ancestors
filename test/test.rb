@@ -18,7 +18,8 @@ class TestPrettyAncestors < Minitest::Test
       end
     EOF
 
-    assert_equal [[[clean_room::M1], clean_room::M2, []], clean_room::M3, []], clean_room::M3.pretty_ancestors
+    assert_equal [[[[clean_room::M1], clean_room::M2, []]], clean_room::M3, []], clean_room::M3.pretty_ancestors
+    assert_equal clean_room::M3.ancestors, clean_room::M3.pretty_ancestors.flatten
   end
 
   def test_include_include
@@ -36,6 +37,7 @@ class TestPrettyAncestors < Minitest::Test
     EOF
 
     assert_equal [[], clean_room::M3, [[[], clean_room::M2, [clean_room::M1]]]], clean_room::M3.pretty_ancestors
+    assert_equal clean_room::M3.ancestors, clean_room::M3.pretty_ancestors.flatten
   end
 
   def test_include_prepend
@@ -53,6 +55,7 @@ class TestPrettyAncestors < Minitest::Test
     EOF
 
     assert_equal [[], clean_room::M3, [[[clean_room::M1], clean_room::M2, []]]], clean_room::M3.pretty_ancestors
+    assert_equal clean_room::M3.ancestors, clean_room::M3.pretty_ancestors.flatten
   end
 
   def test_prepend_include
@@ -70,6 +73,7 @@ class TestPrettyAncestors < Minitest::Test
     EOF
 
     assert_equal [[[[], clean_room::M2, [clean_room::M1]]], clean_room::M3, []], clean_room::M3.pretty_ancestors
+    assert_equal clean_room::M3.ancestors, clean_room::M3.pretty_ancestors.flatten
   end
 
   def build_clean_room code
