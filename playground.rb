@@ -1,11 +1,9 @@
 require './lib/pretty_ancestors'
 
-
 module M1
 end
 
 module M2
-  include M1
 end
 
 module M3
@@ -23,11 +21,12 @@ class C
   prepend M5
 end
 
-class Object
-  prepend M3
+module M2
+  include M1
 end
 
-p C.pretty_ancestors
+p C.ancestors
+p C.pretty_ancestors(:simplified)
 
 #prepend prepend
 [M1, M2, M3]
