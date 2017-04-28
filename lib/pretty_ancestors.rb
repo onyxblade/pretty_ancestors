@@ -47,15 +47,20 @@ class Module
         if included.empty? && prepended.empty?
           mod
         else
-          [included.map{|x| traverse.(x)}, mod, prepended.map{|x| traverse.(x)}]
+          result = []
+          result << included.map{|x| traverse.(x)} if !included.empty?
+          result << mod
+          result << prepended.map{|x| traverse.(x)} if !prepended.empty?
+          result
         end
       end
 
       if self.instance_of? Module
-        traverse.(pretty_ancestors(:raw))
+        result = traverse.(pretty_ancestors(:raw))
       elsif self.instance_of? Class
-        pretty_ancestors(:raw).map{|x| traverse.(x)}
+        result = pretty_ancestors(:raw).map{|x| traverse.(x)}
       end
+      result.instance_of?(Array) ? result : [result]
     when :print
 
       if self.instance_of? Module

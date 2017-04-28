@@ -17,7 +17,7 @@ class TestPrettyAncestors < Minitest::Test
       end
     EOF
 
-    assert_equal [[[[clean_room::M1], clean_room::M2, []]], clean_room::M3, []], clean_room::M3.pretty_ancestors(:simplified)
+    assert_equal [[[[clean_room::M1], clean_room::M2]], clean_room::M3], clean_room::M3.pretty_ancestors(:simplified)
     assert_equal clean_room::M3.ancestors, clean_room::M3.pretty_ancestors(:simplified).flatten
   end
 
@@ -35,7 +35,7 @@ class TestPrettyAncestors < Minitest::Test
       end
     EOF
 
-    assert_equal [[], clean_room::M3, [[[], clean_room::M2, [clean_room::M1]]]], clean_room::M3.pretty_ancestors(:simplified)
+    assert_equal [clean_room::M3, [[clean_room::M2, [clean_room::M1]]]], clean_room::M3.pretty_ancestors(:simplified)
     assert_equal clean_room::M3.ancestors, clean_room::M3.pretty_ancestors(:simplified).flatten
   end
 
@@ -53,7 +53,7 @@ class TestPrettyAncestors < Minitest::Test
       end
     EOF
 
-    assert_equal [[], clean_room::M3, [[[clean_room::M1], clean_room::M2, []]]], clean_room::M3.pretty_ancestors(:simplified)
+    assert_equal [clean_room::M3, [[[clean_room::M1], clean_room::M2]]], clean_room::M3.pretty_ancestors(:simplified)
     assert_equal clean_room::M3.ancestors, clean_room::M3.pretty_ancestors(:simplified).flatten
   end
 
@@ -71,7 +71,7 @@ class TestPrettyAncestors < Minitest::Test
       end
     EOF
 
-    assert_equal [[[[], clean_room::M2, [clean_room::M1]]], clean_room::M3, []], clean_room::M3.pretty_ancestors(:simplified)
+    assert_equal [[[clean_room::M2, [clean_room::M1]]], clean_room::M3], clean_room::M3.pretty_ancestors(:simplified)
     assert_equal clean_room::M3.ancestors, clean_room::M3.pretty_ancestors(:simplified).flatten
   end
 
@@ -89,7 +89,7 @@ class TestPrettyAncestors < Minitest::Test
       end
     EOF
 
-    assert_equal [[], clean_room::M3, [clean_room::M2, clean_room::M1]], clean_room::M3.pretty_ancestors(:simplified)
+    assert_equal [clean_room::M3, [clean_room::M2, clean_room::M1]], clean_room::M3.pretty_ancestors(:simplified)
     assert_equal clean_room::M3.ancestors, clean_room::M3.pretty_ancestors(:simplified).flatten
   end
 
@@ -107,7 +107,7 @@ class TestPrettyAncestors < Minitest::Test
       end
     EOF
 
-    assert_equal [[clean_room::M2, clean_room::M1], clean_room::M3, []], clean_room::M3.pretty_ancestors(:simplified)
+    assert_equal [[clean_room::M2, clean_room::M1], clean_room::M3], clean_room::M3.pretty_ancestors(:simplified)
     assert_equal clean_room::M3.ancestors, clean_room::M3.pretty_ancestors(:simplified).flatten
   end
 
@@ -137,9 +137,9 @@ class TestPrettyAncestors < Minitest::Test
       end
     EOF
 
-    assert_equal [[clean_room::M5], clean_room::C, [[[], clean_room::M2, [clean_room::M1]], [[clean_room::M3], clean_room::M4, []]]], clean_room::C.pretty_ancestors(:simplified)[0]
-    assert_equal Object, clean_room::C.pretty_ancestors(:simplified)[1][1]
-    assert_includes clean_room::C.pretty_ancestors(:simplified)[1][2], Kernel
+    assert_equal [[clean_room::M5], clean_room::C, [[clean_room::M2, [clean_room::M1]], [[clean_room::M3], clean_room::M4]]], clean_room::C.pretty_ancestors(:simplified)[0]
+    assert_equal Object, clean_room::C.pretty_ancestors(:simplified)[1][0]
+    assert_includes clean_room::C.pretty_ancestors(:simplified)[1][1], Kernel
     assert_equal BasicObject, clean_room::C.pretty_ancestors(:simplified)[2]
     assert_equal clean_room::C.ancestors, clean_room::C.pretty_ancestors(:simplified).flatten
   end
@@ -161,8 +161,17 @@ class TestPrettyAncestors < Minitest::Test
       end
     EOF
 
-    assert_equal [[], clean_room::M3, [clean_room::M2]], clean_room::M3.pretty_ancestors(:simplified)
+    assert_equal [clean_room::M3, [clean_room::M2]], clean_room::M3.pretty_ancestors(:simplified)
     assert_equal clean_room::M3.ancestors, clean_room::M3.pretty_ancestors(:simplified).flatten
+  end
+
+  def test_single_module
+    clean_room = build_clean_room <<-EOF
+      module M
+      end
+    EOF
+
+    assert_equal [clean_room::M], clean_room::M.pretty_ancestors(:simplified)
   end
 
   def build_clean_room code
