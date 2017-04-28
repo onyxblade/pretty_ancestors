@@ -1,6 +1,24 @@
+module PrettyAncestors
+  class Result < Array
+    def pretty_print(q)
+      q.group(1, '[', ']') {
+        breaker = ->{
+          q.text ','
+          q.text q.newline
+          q.text q.genspace.(q.indent)
+        }
+        q.seplist self, breaker, :each do |mod|
+          q.pp mod
+        end
+      }
+    end
+
+  end
+end
+
 class Module
 
-  def pretty_ancestors type = :print
+  def pretty_ancestors type = :simplified
     case type
     when :raw
       root_ancestors = ancestors
@@ -60,14 +78,7 @@ class Module
       elsif self.instance_of? Class
         result = pretty_ancestors(:raw).map{|x| traverse.(x)}
       end
-      result.instance_of?(Array) ? result : [result]
-    when :print
-
-      if self.instance_of? Module
-
-      elsif self.instance_of? Class
-
-      end
+      PrettyAncestors::Result.new(result.instance_of?(Array) ? result : [result])
     end
 
   end
